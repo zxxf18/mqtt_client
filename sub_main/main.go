@@ -8,6 +8,8 @@ import (
 
 	"github.com/256dpi/gomqtt/packet"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/zxxf18/mqtt_client/config"
 	"github.com/zxxf18/mqtt_client/protocol/mqtt"
 	"github.com/zxxf18/mqtt_client/utils"
@@ -39,7 +41,13 @@ func sub() error {
 	}
 	cfg.MQTT.ClientID = utils.UUID()
 
-	cli, err := mqtt.NewClient(cfg.MQTT.ClientInfo, &handler{})
+	db, err := NewDB(f)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	cli, err := mqtt.NewClient(cfg.MQTT.ClientInfo, &handler{db: db})
 	if err != nil {
 		return err
 	}
@@ -52,12 +60,17 @@ func sub() error {
 }
 
 type handler struct {
+	db *DB
 }
 
 func (hd *handler) ProcessPublish(publish *packet.Publish) error {
 	//fmt.Println("ProcessPublish --> ", publish.Message.String())
 	fmt.Println()
 	fmt.Println(string(publish.Message.Payload))
+	err := hd.db.Save(publish.Message.Topic, publish.Message.Payload)
+	if err != nil {
+		fmt.Println("failed to save content", err.Error())
+	}
 	return nil
 }
 
