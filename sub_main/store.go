@@ -23,6 +23,14 @@ CREATE TABLE IF NOT EXISTS gitbug_message (
 `
 )
 
+type DBMessage struct {
+	ID         int64     `db:"id" json:"id"`
+	Topic      string    `db:"topic" json:"topic"`
+	Content    string    `db:"content" json:"content"`
+	CreateTime time.Time `db:"create_time" json:"createTime"`
+	UpdateTime time.Time `db:"update_time" json:"updateTime"`
+}
+
 type DBConfig struct {
 	Database struct {
 		Type            string `yaml:"type" json:"type" validate:"nonzero"`
@@ -72,4 +80,14 @@ func (d *DB) Save(topic string, content []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (d *DB) List(begin, end time.Time) ([]DBMessage, error) {
+	sql := fmt.Sprintf(`Select * FROM gitbug_message WHERE create_time BETWEEN ? and ?`)
+	data := []DBMessage{}
+	err := d.db.Select(&data, sql, begin, end)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

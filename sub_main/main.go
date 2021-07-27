@@ -47,15 +47,23 @@ func sub() error {
 	}
 	defer db.Close()
 
-	cli, err := mqtt.NewClient(cfg.MQTT.ClientInfo, &handler{db: db})
+	svr, err := NewServer(f, db)
 	if err != nil {
 		return err
 	}
+	defer svr.Close()
+	go svr.Run()
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt, os.Kill)
 
 	<-sig
+
+	cli, err := mqtt.NewClient(cfg.MQTT.ClientInfo, &handler{db: db})
+	if err != nil {
+		return err
+	}
+
 	return cli.Close()
 }
 

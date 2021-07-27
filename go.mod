@@ -6,6 +6,7 @@ require (
 	github.com/256dpi/gomqtt v0.13.0
 	github.com/creasty/defaults v1.5.1
 	github.com/docker/go-connections v0.4.0
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2 // indirect
