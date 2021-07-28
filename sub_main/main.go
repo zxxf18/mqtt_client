@@ -54,15 +54,15 @@ func sub() error {
 	defer svr.Close()
 	go svr.Run()
 
-	sig := make(chan os.Signal)
-	signal.Notify(sig, os.Interrupt, os.Kill)
-
-	<-sig
-
 	cli, err := mqtt.NewClient(cfg.MQTT.ClientInfo, &handler{db: db})
 	if err != nil {
 		return err
 	}
+
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt, os.Kill)
+
+	<-sig
 
 	return cli.Close()
 }
